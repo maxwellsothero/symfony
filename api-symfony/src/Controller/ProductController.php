@@ -9,6 +9,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 
 class ProductController extends AbstractController
 {   private ObjectRepository $repository;
@@ -19,8 +20,20 @@ class ProductController extends AbstractController
         $this->repository = $manager->getRepository(Product::class);
     }
 
-    public function add(): Response
-    {
+    public function add(Request $request): Response
+    {   $data = $request->request;
+        if($data->get('name')){
+            $product = new Product();
+            $product->setName($data->get('name'));
+            $product->setPrice( (float) $data->get('price'));
+            $product->setDescription($data->get('description'));
+
+            $this->manager->getManager()->persist($product);
+            $this->manager->getManager()->flush();
+
+            return $this->redirectToRoute('product_list');
+
+        }
         return $this->render('product/add.html.twig');
     }
 
